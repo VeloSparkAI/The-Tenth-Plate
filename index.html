@@ -893,7 +893,7 @@ function renderList() {
         html += `<div class="ingredient-row ${checked ? 'checked-row' : ''}" id="row-${key}">
           <div class="checkbox-circle" onclick="toggleCheck('${key}')"></div>
           <span class="ing-text">${ing.text}</span>
-          ${instacartUrl ? `<a class="instacart-btn" href="${instacartUrl}" target="_blank">🛒 Shop</a>` : ''}
+          ${instacartUrl ? `<a class="instacart-btn" href="${instacartUrl}">🛒 Shop</a>` : ''}
         </div>`;
       }
     });
