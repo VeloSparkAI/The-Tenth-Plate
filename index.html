@@ -932,7 +932,7 @@ function startCooking(recipe) {
   currentStepRecipe = recipe;
   currentStep = 0;
   document.getElementById('step-mode').classList.add('active');
-  document.getElementById('cook-recipe-list').parentElement.style.display = 'none';
+  document.getElementById('cook-recipe-list').style.display = 'none';
   document.querySelector('.selector-header').style.display = 'none';
   renderStep();
   requestWakeLock();
@@ -940,8 +940,8 @@ function startCooking(recipe) {
 
 function exitStepMode() {
   document.getElementById('step-mode').classList.remove('active');
-  document.getElementById('cook-recipe-list').parentElement.style.display = 'block';
-  document.querySelector('.selector-header').style.display = 'block';
+  document.getElementById('cook-recipe-list').style.display = '';
+  document.querySelector('.selector-header').style.display = '';
   currentStepRecipe = null;
 }
 
@@ -995,7 +995,7 @@ function showTab(name) {
   if (name === 'cook') {
     buildCookList();
     if (document.getElementById('step-mode').classList.contains('active')) {
-      document.getElementById('cook-recipe-list').parentElement.style.display = 'none';
+      document.getElementById('cook-recipe-list').style.display = 'none';
       document.querySelector('.selector-header').style.display = 'none';
     }
   }
