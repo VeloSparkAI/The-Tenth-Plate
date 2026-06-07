@@ -353,94 +353,100 @@
       font-size: 16px;
     }
 
-    /* ── Step mode ─────────────────────────────────────── */
-    #step-mode {
+    /* ── Full recipe view ──────────────────────────────── */
+    #recipe-view {
       display: none;
-      flex-direction: column;
-      min-height: calc(100vh - 120px);
-      padding: 20px;
+      padding: 0 0 60px;
     }
-    #step-mode.active { display: flex; }
+    #recipe-view.active { display: block; }
 
-    .step-back {
+    .rv-back {
       font-family: Helvetica, Arial, sans-serif;
-      font-size: 12px;
+      font-size: 13px;
       color: var(--sage);
       background: none;
       border: none;
       cursor: pointer;
-      padding: 0;
-      margin-bottom: 16px;
+      padding: 16px 20px 8px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
-    .step-recipe-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: var(--dark-text);
-      margin-bottom: 4px;
+    .rv-header {
+      padding: 8px 20px 20px;
+      border-bottom: 2px solid var(--light-sage);
+      margin-bottom: 0;
     }
-    .step-counter {
+    .rv-category {
       font-family: Helvetica, Arial, sans-serif;
-      font-size: 11px;
-      color: var(--warm-gray);
-      margin-bottom: 24px;
-    }
-    .step-progress {
-      height: 3px;
-      background: var(--light-sage);
-      border-radius: 2px;
-      margin-bottom: 30px;
-      overflow: hidden;
-    }
-    .step-progress-bar {
-      height: 100%;
-      background: var(--terracotta);
-      border-radius: 2px;
-      transition: width 0.3s ease;
-    }
-    .step-number {
-      font-family: Helvetica, Arial, sans-serif;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: bold;
+      letter-spacing: 0.12em;
       color: var(--terracotta);
-      letter-spacing: 0.1em;
       text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .rv-title {
+      font-size: 26px;
+      color: var(--dark-text);
+      line-height: 1.2;
       margin-bottom: 12px;
     }
-    .step-text {
-      font-size: 20px;
-      line-height: 1.6;
-      color: var(--dark-text);
-      flex: 1;
-    }
-    .step-nav {
-      display: flex;
-      gap: 12px;
-      margin-top: 30px;
-    }
-    .step-btn {
-      flex: 1;
-      padding: 16px;
-      border-radius: 10px;
+    .rv-meta {
       font-family: Helvetica, Arial, sans-serif;
-      font-size: 15px;
+      font-size: 12px;
+      color: var(--warm-gray);
+      display: flex;
+      gap: 16px;
+    }
+    .rv-section-label {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 11px;
       font-weight: bold;
-      border: none;
-      cursor: pointer;
-    }
-    #prev-btn {
-      background: var(--info-bar);
+      letter-spacing: 0.1em;
       color: var(--dark-olive);
+      text-transform: uppercase;
+      padding: 20px 20px 8px;
+      border-top: 1px solid var(--light-sage);
+      margin-top: 4px;
     }
-    #next-btn {
-      background: var(--terracotta);
-      color: white;
+    .rv-ingredient {
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--dark-text);
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--info-bar);
     }
-    #next-btn:disabled {
-      background: var(--light-sage);
-      color: var(--white);
+    .rv-step {
+      display: flex;
+      gap: 14px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--info-bar);
+      align-items: flex-start;
+    }
+    .rv-step-num {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--terracotta);
+      min-width: 22px;
+      padding-top: 3px;
+    }
+    .rv-step-text {
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--dark-text);
+    }
+    .rv-tip {
+      margin: 16px 20px;
+      background: var(--info-bar);
+      border-left: 3px solid var(--sage);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-style: italic;
+      color: var(--med-text);
+      line-height: 1.5;
     }
     .step-done {
       text-align: center;
@@ -509,19 +515,10 @@
 <div id="cook-section" class="section">
   <div class="selector-header">Choose a recipe to cook</div>
   <div class="cook-recipe-selector" id="cook-recipe-list"></div>
-
-  <div id="step-mode">
-    <button class="step-back" onclick="exitStepMode()">← Back to recipes</button>
-    <div class="wake-pill"><div class="wake-dot"></div> Screen staying on</div>
-    <div class="step-recipe-title" id="step-title"></div>
-    <div class="step-counter" id="step-counter"></div>
-    <div class="step-progress"><div class="step-progress-bar" id="step-bar"></div></div>
-    <div class="step-number" id="step-num"></div>
-    <div class="step-text" id="step-text"></div>
-    <div class="step-nav">
-      <button class="step-btn" id="prev-btn" onclick="prevStep()">← Prev</button>
-      <button class="step-btn" id="next-btn" onclick="nextStep()">Next →</button>
-    </div>
+  <div id="recipe-view">
+    <button class="rv-back" onclick="exitRecipeView()">← All recipes</button>
+    <div class="wake-pill" style="margin: 0 20px 4px;"><div class="wake-dot"></div> Screen staying on</div>
+    <div id="rv-content"></div>
   </div>
 </div>
 
@@ -929,38 +926,62 @@ function buildCookList() {
 }
 
 function startCooking(recipe) {
-  currentStepRecipe = recipe;
-  currentStep = 0;
-  document.getElementById('step-mode').classList.add('active');
   document.getElementById('cook-recipe-list').style.display = 'none';
   document.querySelector('.selector-header').style.display = 'none';
-  renderStep();
+  document.getElementById('recipe-view').classList.add('active');
+
+  // Build full recipe page
+  let ing = '';
+  recipe.ingredients.forEach(item => {
+    if (!item.search) {
+      // Section header (e.g. "FOR THE SAUCE:")
+      ing += `<div class="rv-section-label" style="padding-top:10px;">${item.text}</div>`;
+    } else {
+      ing += `<div class="rv-ingredient">${item.text}</div>`;
+    }
+  });
+
+  let steps = '';
+  recipe.method.forEach((s, i) => {
+    steps += `<div class="rv-step"><span class="rv-step-num">${i+1}</span><span class="rv-step-text">${s}</span></div>`;
+  });
+
+  const tip = recipe.tip ? `<div class="rv-tip">💡 ${recipe.tip}</div>` : '';
+  const pairing = recipe.pairing ? `<div class="rv-tip">🍷 ${recipe.pairing}</div>` : '';
+
+  document.getElementById('rv-content').innerHTML = `
+    <div class="rv-header">
+      <div class="rv-category">${recipe.category}</div>
+      <div class="rv-title">${recipe.name.replace('\n', ' ')}</div>
+      <div class="rv-meta"><span>⏱ ${recipe.time}</span><span>👥 ${recipe.serves}</span></div>
+    </div>
+    <div class="rv-section-label">Ingredients</div>
+    ${ing}
+    <div class="rv-section-label">Method</div>
+    ${steps}
+    ${tip}${pairing}
+  `;
+
+  window.scrollTo(0, 0);
   requestWakeLock();
 }
 
-function exitStepMode() {
-  document.getElementById('step-mode').classList.remove('active');
+function exitRecipeView() {
+  document.getElementById('recipe-view').classList.remove('active');
   document.getElementById('cook-recipe-list').style.display = '';
   document.querySelector('.selector-header').style.display = '';
-  currentStepRecipe = null;
 }
 
 function renderStep() {
+  // legacy stub — no longer used
   const r = currentStepRecipe;
+  if (!r) return;
   const total = r.method.length;
-  document.getElementById('step-title').textContent = r.name.replace('\n', ' ');
-  document.getElementById('step-counter').textContent = `Step ${currentStep + 1} of ${total}`;
-  document.getElementById('step-bar').style.width = `${((currentStep + 1) / total) * 100}%`;
-  document.getElementById('step-num').textContent = `Step ${currentStep + 1}`;
-  document.getElementById('step-text').textContent = r.method[currentStep];
-  document.getElementById('prev-btn').disabled = currentStep === 0;
   const nextBtn = document.getElementById('next-btn');
-  if (currentStep === total - 1) {
+  if (nextBtn && currentStep === total - 1) {
     nextBtn.textContent = 'Done ✓';
     nextBtn.disabled = false;
     nextBtn.onclick = () => {
-      document.getElementById('step-text').textContent = "That's it — enjoy!";
-      document.getElementById('step-num').textContent = 'Complete';
       nextBtn.disabled = true;
     };
   } else {
@@ -994,10 +1015,6 @@ function showTab(name) {
   if (name === 'list') renderList();
   if (name === 'cook') {
     buildCookList();
-    if (document.getElementById('step-mode').classList.contains('active')) {
-      document.getElementById('cook-recipe-list').style.display = 'none';
-      document.querySelector('.selector-header').style.display = 'none';
-    }
   }
 }
 
