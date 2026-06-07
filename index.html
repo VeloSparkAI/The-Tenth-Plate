@@ -888,7 +888,7 @@ function renderList() {
         </div>`;
       } else {
         const instacartUrl = ing.search
-          ? `https://www.instacart.com/store/search_v3/term?term=${encodeURIComponent(ing.search)}`
+          ? `https://www.instacart.com/store/s?k=${encodeURIComponent(ing.search)}`
           : null;
         html += `<div class="ingredient-row ${checked ? 'checked-row' : ''}" id="row-${key}">
           <div class="checkbox-circle" onclick="toggleCheck('${key}')"></div>
@@ -1009,6 +1009,7 @@ if (preSelect) {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 buildRecipeGrid();
+buildCookList();
 </script>
 </body>
 </html>
