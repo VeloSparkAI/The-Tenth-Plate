@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>The Tenth Plate — Smart Shopping</title>
+  <style>
+    :root {
+      --linen:       #f9f6f0;
+      --light-sage:  #c8d4bc;
+      --sage:        #7a8c6e;
+      --dark-olive:  #6b7a5a;
+      --terracotta:  #c4622a;
+      --dark-text:   #2e2e2a;
+      --med-text:    #5a5650;
+      --warm-gray:   #9a9488;
+      --info-bar:    #ede8de;
+      --white:       #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: var(--linen);
+      color: var(--dark-text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────────── */
+    header {
+      background: #2a3324;
+      color: var(--linen);
+      padding: 16px 20px 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--terracotta);
+    }
+    header h1 {
+      font-size: 13px;
+      font-family: Helvetica, Arial, sans-serif;
+      letter-spacing: 0.12em;
+      font-weight: normal;
+      color: var(--light-sage);
+      text-transform: uppercase;
+    }
+    header h2 {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 2px;
+      color: var(--linen);
+    }
+
+    /* ── Tab bar ─────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      background: var(--info-bar);
+      border-bottom: 1px solid var(--light-sage);
+    }
+    .tab {
+      flex: 1;
+      padding: 12px 8px;
+      text-align: center;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--warm-gray);
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      color: var(--dark-olive);
+      border-bottom-color: var(--terracotta);
+    }
+
+    /* ── Sections ─────────────────────────────────────── */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ── Wake lock banner ────────────────────────────── */
+    #wake-banner {
+      background: var(--dark-olive);
+      color: var(--linen);
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      text-align: center;
+      padding: 7px;
+      display: none;
+    }
+    #wake-banner.show { display: block; }
+
+    /* ── Recipe selector ─────────────────────────────── */
+    .selector-header {
+      padding: 16px 20px 8px;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 10px;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      color: var(--warm-gray);
+      text-transform: uppercase;
+    }
+
+    .recipe-grid {
+      padding: 0 12px 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .recipe-card {
+      background: var(--white);
+      border-radius: 8px;
+      border: 2px solid transparent;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .recipe-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--light-sage);
+      transition: background 0.15s;
+    }
+    .recipe-card.selected {
+      border-color: var(--sage);
+      background: #f0f4ed;
+    }
+    .recipe-card.selected::before {
+      background: var(--terracotta);
+    }
+    .recipe-num {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 10px;
+      color: var(--terracotta);
+      font-weight: bold;
+      letter-spacing: 0.05em;
+    }
+    .recipe-name {
+      font-size: 12px;
+      font-weight: bold;
+      line-height: 1.3;
+      margin-top: 3px;
+      color: var(--dark-text);
+    }
+    .recipe-time {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 10px;
+      color: var(--warm-gray);
+      margin-top: 4px;
+    }
+    .check-mark {
+      position: absolute;
+      top: 8px; right: 8px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--terracotta);
+      color: white;
+      font-size: 11px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-family: Helvetica, Arial, sans-serif;
+      font-weight: bold;
+    }
+    .recipe-card.selected .check-mark { display: flex; }
+
+    /* ── Shop actions ─────────────────────────────────── */
+    .shop-actions {
+      padding: 0 12px 16px;
+      display: flex;
+      gap: 8px;
+    }
+    .btn-primary {
+      flex: 1;
+      background: var(--terracotta);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 13px;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+    }
+    .btn-secondary {
+      flex: 1;
+      background: var(--info-bar);
+      color: var(--dark-olive);
+      border: 2px solid var(--light-sage);
+      border-radius: 8px;
+      padding: 13px;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* ── Shopping list ─────────────────────────────────── */
+    #list-section { padding-bottom: 40px; }
+
+    .list-empty {
+      text-align: center;
+      padding: 60px 30px;
+      color: var(--warm-gray);
+      font-style: italic;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .recipe-section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 20px 8px;
+      border-top: 1px solid var(--light-sage);
+    }
+    .recipe-section-header:first-child { border-top: none; }
+    .recipe-section-num {
+      background: var(--terracotta);
+      color: white;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 10px;
+      font-weight: bold;
+      border-radius: 4px;
+      padding: 2px 7px;
+    }
+    .recipe-section-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--dark-text);
+    }
+
+    .ingredient-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      border-bottom: 1px solid #ede8de;
+      gap: 10px;
+    }
+    .ingredient-row:last-child { border-bottom: none; }
+    .ing-text {
+      flex: 1;
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--dark-text);
+    }
+    .ing-text.header-item {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 10px;
+      font-weight: bold;
+      color: var(--sage);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .instacart-btn {
+      flex-shrink: 0;
+      background: #003d00;
+      color: #43b02a;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .instacart-btn:active { opacity: 0.8; }
+
+    .checked-row {
+      background: #f0f4ed;
+    }
+    .checked-row .ing-text {
+      text-decoration: line-through;
+      color: var(--warm-gray);
+    }
+    .checkbox-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--light-sage);
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .checked-row .checkbox-circle {
+      background: var(--sage);
+      border-color: var(--sage);
+    }
+    .checkbox-circle::after {
+      content: '';
+    }
+    .checked-row .checkbox-circle::after {
+      content: '✓';
+      color: white;
+      font-size: 12px;
+      font-family: Helvetica, Arial, sans-serif;
+    }
+
+    /* ── Cook mode ─────────────────────────────────────── */
+    #cook-section { padding-bottom: 40px; }
+
+    .cook-recipe-selector { padding: 0 12px 12px; }
+    .cook-recipe-btn {
+      display: block;
+      width: 100%;
+      background: var(--white);
+      border: 2px solid var(--light-sage);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: Georgia, serif;
+    }
+    .cook-recipe-btn:active { background: var(--info-bar); }
+    .cook-num {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      color: var(--terracotta);
+      font-weight: bold;
+      min-width: 24px;
+    }
+    .cook-name {
+      font-size: 14px;
+      color: var(--dark-text);
+      flex: 1;
+    }
+    .cook-arrow {
+      color: var(--warm-gray);
+      font-size: 16px;
+    }
+
+    /* ── Step mode ─────────────────────────────────────── */
+    #step-mode {
+      display: none;
+      flex-direction: column;
+      min-height: calc(100vh - 120px);
+      padding: 20px;
+    }
+    #step-mode.active { display: flex; }
+
+    .step-back {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      color: var(--sage);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .step-recipe-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--dark-text);
+      margin-bottom: 4px;
+    }
+    .step-counter {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      color: var(--warm-gray);
+      margin-bottom: 24px;
+    }
+    .step-progress {
+      height: 3px;
+      background: var(--light-sage);
+      border-radius: 2px;
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+    .step-progress-bar {
+      height: 100%;
+      background: var(--terracotta);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+    .step-number {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--terracotta);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .step-text {
+      font-size: 20px;
+      line-height: 1.6;
+      color: var(--dark-text);
+      flex: 1;
+    }
+    .step-nav {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+    }
+    .step-btn {
+      flex: 1;
+      padding: 16px;
+      border-radius: 10px;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 15px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+    #prev-btn {
+      background: var(--info-bar);
+      color: var(--dark-olive);
+    }
+    #next-btn {
+      background: var(--terracotta);
+      color: white;
+    }
+    #next-btn:disabled {
+      background: var(--light-sage);
+      color: var(--white);
+    }
+    .step-done {
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 18px;
+      font-style: italic;
+      color: var(--dark-olive);
+    }
+    .wake-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--dark-olive);
+      color: white;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 10px;
+      border-radius: 20px;
+      padding: 4px 10px;
+      margin-bottom: 20px;
+    }
+    .wake-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #7dce5a;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>The Tenth Plate · Summer Edition</h1>
+  <h2>Smart Shopping & Cook Mode</h2>
+</header>
+
+<div id="wake-banner">📱 Screen will stay on while you cook</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('shop')">🛒 Shop</button>
+  <button class="tab" onclick="showTab('list')">📋 My List</button>
+  <button class="tab" onclick="showTab('cook')">👨‍🍳 Cook</button>
+</div>
+
+<!-- ══ SHOP TAB ══════════════════════════════════════════ -->
+<div id="shop-section" class="section active">
+  <div class="selector-header">Select recipes to shop</div>
+  <div class="recipe-grid" id="recipe-grid"></div>
+  <div class="shop-actions">
+    <button class="btn-primary" onclick="buildList()">Build Shopping List →</button>
+    <button class="btn-secondary" onclick="clearAll()">Clear</button>
+  </div>
+</div>
+
+<!-- ══ LIST TAB ══════════════════════════════════════════ -->
+<div id="list-section" class="section">
+  <div id="ingredient-list">
+    <div class="list-empty">Select recipes on the Shop tab<br>to build your list.</div>
+  </div>
+</div>
+
+<!-- ══ COOK TAB ══════════════════════════════════════════ -->
+<div id="cook-section" class="section">
+  <div class="selector-header">Choose a recipe to cook</div>
+  <div class="cook-recipe-selector" id="cook-recipe-list"></div>
+
+  <div id="step-mode">
+    <button class="step-back" onclick="exitStepMode()">← Back to recipes</button>
+    <div class="wake-pill"><div class="wake-dot"></div> Screen staying on</div>
+    <div class="step-recipe-title" id="step-title"></div>
+    <div class="step-counter" id="step-counter"></div>
+    <div class="step-progress"><div class="step-progress-bar" id="step-bar"></div></div>
+    <div class="step-number" id="step-num"></div>
+    <div class="step-text" id="step-text"></div>
+    <div class="step-nav">
+      <button class="step-btn" id="prev-btn" onclick="prevStep()">← Prev</button>
+      <button class="step-btn" id="next-btn" onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Recipe data ──────────────────────────────────────────────────────────────
+const RECIPES = [
+  {
+    id: '01', name: 'Buffalo Chicken\nJalapeño Poppers',
+    shortName: 'Jalapeño Poppers',
+    category: 'APPETIZER', time: '35 min',
+    ingredients: [
+      { text: '12 large jalapeños, halved & deseeded', search: 'jalapeños' },
+      { text: '250g / 9oz cream cheese, softened', search: 'cream cheese' },
+      { text: '250g / 2 cups cooked chicken, shredded', search: 'rotisserie chicken' },
+      { text: '45ml / 3 tbsp buffalo hot sauce', search: 'buffalo hot sauce' },
+      { text: '115g / 1 cup sharp cheddar, shredded', search: 'sharp cheddar cheese' },
+      { text: '60g / ¼ cup blue cheese, crumbled', search: 'blue cheese crumbles' },
+      { text: '60g / ½ cup panko breadcrumbs', search: 'panko breadcrumbs' },
+      { text: '30g / 2 tbsp melted butter', search: 'unsalted butter' },
+      { text: 'Ranch or blue cheese dip to serve', search: 'ranch dressing' },
+    ],
+    method: [
+      'Preheat oven to 200°C / 400°F. Line a baking tray.',
+      'Mix cream cheese, chicken, buffalo sauce, blue cheese and half the cheddar until combined.',
+      'Fill each jalapeño half generously with the buffalo chicken mixture.',
+      'Top with remaining cheddar. Toss panko with butter, sprinkle over each popper.',
+      'Bake 20–22 mins until cheese is bubbly and panko is golden.',
+      'Finish under the grill 2 mins for extra crunch. Serve with ranch or blue cheese.',
+    ]
+  },
+  {
+    id: '02', name: 'Olive Oil Poached\nTomatoes & Stracciatella',
+    shortName: 'Tomatoes & Stracciatella',
+    category: 'SALAD', time: '45 min',
+    ingredients: [
+      { text: '500g / 1.1 lbs mixed cherry tomatoes', search: 'cherry tomatoes' },
+      { text: '300ml / 1¼ cups extra-virgin olive oil', search: 'extra virgin olive oil' },
+      { text: '4 garlic cloves, lightly crushed', search: 'garlic' },
+      { text: '4 sprigs fresh thyme', search: 'fresh thyme' },
+      { text: '1 bulb fennel, very thinly sliced', search: 'fennel bulb' },
+      { text: '250g / 9oz fresh stracciatella', search: 'stracciatella cheese' },
+      { text: '45ml / 3 tbsp aged balsamic vinegar', search: 'aged balsamic vinegar' },
+      { text: 'Micro basil or torn fresh basil', search: 'fresh basil' },
+      { text: 'Flaky sea salt & cracked pepper', search: 'flaky sea salt' },
+    ],
+    method: [
+      'Toss sliced fennel with a little olive oil and salt. Roast at 220°C / 425°F for 12–15 mins until golden and caramelised at the edges.',
+      'Place tomatoes, olive oil, garlic and thyme in a small saucepan over lowest heat.',
+      'Poach gently 25–30 mins until just tender, skins beginning to split.',
+      'Remove from heat. Let tomatoes cool in the oil for 15 mins.',
+      'Spread stracciatella across a wide platter. Layer roasted fennel over the top.',
+      'Spoon poached tomatoes over. Drizzle with balsamic and 2 tbsp poaching oil.',
+      'Finish with micro basil or torn fresh basil, flaky salt and cracked pepper. Serve immediately.',
+    ]
+  },
+  {
+    id: '03', name: 'Chopped Salad,\nDijon Vinaigrette',
+    shortName: 'Chopped Salad',
+    category: 'SALAD', time: '20 min',
+    ingredients: [
+      { text: '2 heads romaine lettuce, chopped', search: 'romaine lettuce' },
+      { text: '200g / 1 cup grape tomatoes, halved', search: 'grape tomatoes' },
+      { text: '1 cucumber, diced small', search: 'cucumber' },
+      { text: '1 ear corn, kernels cut off', search: 'corn on the cob' },
+      { text: '2 hard-boiled eggs, quartered', search: 'eggs' },
+      { text: '6 mini sweet peppers, sliced', search: 'mini sweet peppers' },
+      { text: '100g / 3.5oz blue cheese, crumbled', search: 'blue cheese' },
+      { header: true, text: 'VINAIGRETTE' },
+      { text: '90ml / 6 tbsp Dijon mustard', search: 'Dijon mustard' },
+      { text: '60ml / 4 tbsp red wine vinegar', search: 'red wine vinegar' },
+      { text: '120ml / 4 fl oz avocado oil', search: 'avocado oil' },
+      { text: '2 shallots, minced', search: 'shallots' },
+      { text: '2 tbsp honey', search: 'honey' },
+      { text: '2 tbsp fresh chives, ½ tsp oregano', search: 'fresh chives' },
+    ],
+    method: [
+      'Whisk Dijon, red wine vinegar, shallots, chives, oregano and honey together.',
+      'Stream in avocado oil while whisking until emulsified. Season well.',
+      'Combine romaine, tomatoes, cucumber, corn, sweet peppers and blue cheese.',
+      'Add boiled eggs and toss gently — you want the eggs to stay in wedges.',
+      'Pour vinaigrette over and toss to coat. Serve immediately.',
+    ]
+  },
+  {
+    id: '04', name: 'Summer Crab Boil,\nCajun Butter',
+    shortName: 'Summer Crab Boil',
+    category: 'ENTREE', time: '55 min',
+    ingredients: [
+      { text: '700g / 1.5 lbs snow crab clusters (pre-cooked)', search: 'snow crab clusters' },
+      { text: '340g / 12oz andouille sausage, sliced', search: 'andouille sausage' },
+      { text: '450g / 1 lb baby potatoes', search: 'baby potatoes' },
+      { text: '4 ears grilled corn on the cob, cut in 3 pieces', search: 'corn on the cob' },
+      { header: true, text: 'COURT BOUILLON' },
+      { text: '3 quarts water, 250ml / 1 cup white wine', search: 'dry white wine' },
+      { text: '3 tbsp Cajun seasoning, 1 tbsp Old Bay', search: 'cajun seasoning' },
+      { text: '1 yellow onion sliced, 1 lemon', search: 'yellow onion' },
+      { header: true, text: 'CAJUN BUTTER' },
+      { text: '225g / 2 sticks unsalted butter', search: 'unsalted butter' },
+      { text: '10 garlic cloves minced', search: 'garlic' },
+      { text: '30ml / 2 tbsp lemon juice', search: 'lemon' },
+      { text: '1 tbsp Old Bay, 1 tsp Cajun seasoning, 1 tsp smoked paprika', search: 'Old Bay seasoning' },
+    ],
+    method: [
+      'Make cajun butter: melt butter with garlic over medium heat. Add lemon, Old Bay, Cajun seasoning, paprika and hot sauce. Simmer 5–7 mins. Keep warm.',
+      'In a large stockpot, combine water, wine, Cajun seasoning, Old Bay, onion, lemon and hot sauce. Bring to a boil and cook 15 mins.',
+      'Add potatoes and andouille. Cook 15–20 mins until potatoes are just fork-tender.',
+      'Add crab and corn. Cook 5–7 mins until crab is heated through.',
+      'Use a spider strainer to transfer everything onto a foil-lined baking sheet.',
+      'Pour cajun butter generously over everything and toss to coat every piece.',
+      'Serve immediately with extra lemon wedges and fresh parsley.',
+    ]
+  },
+  {
+    id: '05', name: 'Blackened Chicken,\nAvocado Crema',
+    shortName: 'Blackened Chicken',
+    category: 'ENTREE', time: '30 min',
+    ingredients: [
+      { text: '4 bone-in skin-on chicken thighs', search: 'chicken thighs bone in' },
+      { text: '45g / 3 tbsp unsalted butter, melted', search: 'unsalted butter' },
+      { header: true, text: 'BLACKENING SPICE' },
+      { text: '1 tbsp smoked paprika', search: 'smoked paprika' },
+      { text: '1 tsp each: garlic powder, onion powder, cumin', search: 'garlic powder' },
+      { text: '½ tsp each: cayenne, dried thyme, dried oregano', search: 'cayenne pepper' },
+      { text: '1 tsp salt, ½ tsp black pepper', search: 'black pepper' },
+      { text: '30ml / 2 tbsp avocado oil', search: 'avocado oil' },
+      { header: true, text: 'AVOCADO CREMA' },
+      { text: '2 ripe avocados', search: 'avocados' },
+      { text: '120ml / ½ cup sour cream', search: 'sour cream' },
+      { text: 'Juice of 1 lime, 1 garlic clove', search: 'limes' },
+    ],
+    method: [
+      'Mix all blackening spices together. Pat chicken dry, then brush or coat each thigh generously with melted butter.',
+      'Press the spice blend firmly onto every surface. If you can still see chicken, add more seasoning — do not be shy.',
+      'Heat a cast-iron skillet over high heat until smoking. Add oil. Sear skin-side down 5–6 mins until deeply blackened. Flip and cook 4 mins more.',
+      'Transfer skillet to 200°C / 400°F oven. Bake 15–18 mins until cooked through (74°C / 165°F).',
+      'Meanwhile blend avocados, sour cream, lime juice, garlic and salt until silky smooth.',
+      'Rest chicken 5 mins. Serve over or alongside the avocado crema.',
+    ]
+  },
+  {
+    id: '06', name: 'Moo Ping\n(Thai Pork Skewers)',
+    shortName: 'Moo Ping',
+    category: 'ENTREE', time: '30 min + marinade',
+    ingredients: [
+      { text: '~24 bamboo skewers, soaked 1+ hour', search: 'bamboo skewers' },
+      { text: '680g / 1½ lbs pork shoulder, sliced thin', search: 'pork shoulder' },
+      { text: '5 garlic cloves, minced', search: 'garlic' },
+      { text: '2 tbsp chopped cilantro', search: 'fresh cilantro' },
+      { text: '30ml / 2 tbsp oyster sauce', search: 'oyster sauce' },
+      { text: '30ml / 2 tbsp soy sauce', search: 'soy sauce' },
+      { text: '45ml / 3 tbsp black soy sauce', search: 'black soy sauce' },
+      { text: '45ml / 3 tbsp palm sugar', search: 'palm sugar' },
+      { text: '15ml / 1 tbsp avocado oil', search: 'avocado oil' },
+      { text: '175ml / ¾ cup coconut milk', search: 'coconut milk' },
+      { text: '45ml / 3 tbsp water', search: '' },
+      { text: '¼ tsp each white & black peppercorns, crushed', search: 'white peppercorns' },
+      { text: '24g / 3 tbsp cornstarch', search: 'cornstarch' },
+    ],
+    method: [
+      'Combine all marinade ingredients except cornstarch and mix well.',
+      'Slice pork ~5mm / ¼ inch thin against the grain, removing any silver skin.',
+      'Toss pork in marinade. Marinate overnight (8 hrs) or at least 3 hrs.',
+      'Sprinkle cornstarch over marinated pork and mix well to coat.',
+      'Skewer 4–5 pieces per skewer laying flat and shingled. Chill 1 hr to set shape.',
+      'Grill medium to medium-high, 1.5–2 mins per side. Shield skewer tips with foil.',
+    ]
+  },
+  {
+    id: '07', name: 'Black Garlic Ribeye,\nChimichurri',
+    shortName: 'Black Garlic Ribeye',
+    category: 'ENTREE', time: '30 min',
+    ingredients: [
+      { text: '2 ribeye steaks (350g / 12oz each, 1 inch thick)', search: 'ribeye steak' },
+      { text: '4 black garlic cloves, mashed to a paste', search: 'black garlic' },
+      { text: '30ml / 2 tbsp olive oil, salt & cracked pepper', search: 'olive oil' },
+      { header: true, text: 'CHIMICHURRI' },
+      { text: '30g / 1 cup flat-leaf parsley, chopped', search: 'flat leaf parsley' },
+      { text: '4 garlic cloves minced, 1 shallot finely diced', search: 'garlic' },
+      { text: '120ml / ½ cup olive oil', search: 'olive oil' },
+      { text: '45ml / 3 tbsp red wine vinegar', search: 'red wine vinegar' },
+      { text: '1 tsp dried oregano, 1 tsp chilli flakes', search: 'red chili flakes' },
+    ],
+    method: [
+      'Make chimichurri: combine all ingredients. Rest at room temperature 30 mins.',
+      'Pat steaks dry. Rub black garlic paste all over. Season generously with salt and pepper.',
+      'Heat a cast-iron skillet until smoking hot. Add oil.',
+      'Sear steaks 3–4 mins per side for medium-rare. Baste with butter in final 2 mins.',
+      'Rest on a wire rack 5–8 mins. Do not skip the rest.',
+      'Slice against the grain. Spoon chimichurri generously over. Serve immediately.',
+    ]
+  },
+  {
+    id: '08', name: 'Twice Baked Potato,\nCrème Fraîche',
+    shortName: 'Twice Baked Potato',
+    category: 'SIDE', time: '1 hr 30 min',
+    ingredients: [
+      { text: '4 large russet potatoes', search: 'russet potatoes' },
+      { text: '150g / 5oz crème fraîche', search: 'crème fraîche' },
+      { text: '120ml / ½ cup heavy cream', search: 'heavy cream' },
+      { text: '100g / 3.5oz unsalted butter, cubed', search: 'unsalted butter' },
+      { text: '100g / 3.5oz sharp cheddar, grated', search: 'sharp cheddar cheese' },
+      { text: '4 green onions, thinly sliced', search: 'green onions' },
+      { text: '4 strips bacon, cooked crispy & chopped', search: 'bacon strips' },
+      { text: '30ml / 2 tbsp olive oil', search: 'olive oil' },
+      { text: 'Flaky sea salt & cracked pepper', search: 'flaky sea salt' },
+    ],
+    method: [
+      'Preheat oven to 200°C / 400°F. Rub potatoes with olive oil and flaky salt.',
+      'Bake directly on oven rack 60 mins until completely tender.',
+      'Slice off the top third of each potato. Scoop out flesh, leaving a 5mm shell.',
+      'Mash flesh with butter, crème fraîche and heavy cream until very smooth. Season well.',
+      'Fold in most of the cheddar, green onions and chopped bacon.',
+      'Fill shells, mound high, top with remaining cheddar and bacon. Bake 20–25 mins until golden.',
+      'Finish with extra green onion and serve hot.',
+    ]
+  },
+  {
+    id: '09', name: 'Hatch Green Chili\nCream Corn, Cotija',
+    shortName: 'Hatch Cream Corn',
+    category: 'SIDE', time: '30 min',
+    ingredients: [
+      { text: '4 ears grilled corn, kernels cut off', search: 'corn on the cob' },
+      { text: '300g / 1¼ cups finely diced yellow onion', search: 'yellow onion' },
+      { text: '2 garlic cloves, minced', search: 'garlic' },
+      { text: '175g / ¾ cup diced Hatch green chili', search: 'hatch green chili' },
+      { text: '4 slices bacon, cooked crispy & crumbled', search: 'bacon' },
+      { text: '30ml / 2 tbsp bacon grease', search: 'bacon' },
+      { text: '175ml / ¾ cup heavy cream', search: 'heavy cream' },
+      { text: '45g / 3 tbsp crème fraîche', search: 'crème fraîche' },
+      { text: '30g / 2 tbsp whole butter', search: 'unsalted butter' },
+      { text: '1 tbsp chili powder', search: 'chili powder' },
+      { text: '55g / 2oz cotija cheese, grated', search: 'cotija cheese' },
+      { text: '1 tbsp fresh cilantro leaves', search: 'fresh cilantro' },
+    ],
+    method: [
+      'Heat bacon grease in a wide skillet over medium heat. Sauté onion until translucent.',
+      'Add garlic and Hatch green chilis. Cook until fragrant, about 2 mins.',
+      'Add corn kernels and cook 3–4 minutes.',
+      'Pour in heavy cream and bring to a simmer. Add crème fraîche.',
+      'Reduce 5–7 minutes, stirring, until thickened.',
+      'Remove from heat and fold in butter until melted.',
+      'Transfer to a serving dish. Top with crispy bacon, cotija, chili powder and cilantro.',
+    ]
+  },
+  {
+    id: '10', name: 'Spiked Watermelon\nAgua Fresca',
+    shortName: 'Watermelon Agua Fresca',
+    category: 'COCKTAIL', time: '20 min',
+    ingredients: [
+      { text: '1.2kg / 8 cups cubed seedless watermelon', search: 'seedless watermelon' },
+      { text: '360ml / 1½ cups water (for blending)', search: '' },
+      { text: '1.3L / 1 quart + 1½ cups cold water (to finish)', search: '' },
+      { text: '80–120ml / ¼–½ cup fresh lime juice', search: 'limes' },
+      { text: '150–250g / ¾–1¼ cup sugar', search: 'granulated sugar' },
+      { header: true, text: 'PER COCKTAIL' },
+      { text: '180ml / 6 oz watermelon agua fresca', search: '' },
+      { text: '45ml / 1½ oz tequila reposado', search: 'tequila reposado' },
+      { text: 'Ice & lime wheels to garnish', search: 'limes' },
+    ],
+    method: [
+      'Add watermelon, 1½ cups water, lime juice and minimum sugar to a blender.',
+      'Blend until smooth. Work in batches if needed. Strain through a fine-mesh sieve. Discard pulp.',
+      'Pour into a large pitcher or jar. Add 1 quart plus 1½ cups cold water. Stir well.',
+      'Taste — adjust with more lime or sugar until balanced. Chill until ready to serve.',
+      'To serve each cocktail: fill a glass with ice. Pour in 6 oz agua fresca.',
+      'Add 1½ oz tequila reposado. Stir gently and garnish with a lime wheel.',
+    ]
+  },
+];
+
+// ── State ────────────────────────────────────────────────────────────────────
+let selectedIds = new Set();
+let checkedItems = new Set();
+let currentStepRecipe = null;
+let currentStep = 0;
+let wakeLock = null;
+
+// ── Wake Lock ────────────────────────────────────────────────────────────────
+async function requestWakeLock() {
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      document.getElementById('wake-banner').classList.add('show');
+    } catch (e) { /* not available */ }
+  }
+}
+
+// Request wake lock on page load
+requestWakeLock();
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') requestWakeLock();
+});
+
+// ── Pre-select from URL param ─────────────────────────────────────────────────
+const urlParams = new URLSearchParams(window.location.search);
+const preSelect = urlParams.get('recipe');
+if (preSelect) {
+  selectedIds.add(preSelect);
+}
+
+// ── Build recipe grid ─────────────────────────────────────────────────────────
+function buildRecipeGrid() {
+  const grid = document.getElementById('recipe-grid');
+  grid.innerHTML = '';
+  RECIPES.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'recipe-card' + (selectedIds.has(r.id) ? ' selected' : '');
+    card.innerHTML = `
+      <div class="check-mark">✓</div>
+      <div class="recipe-num">No. ${r.id}</div>
+      <div class="recipe-name">${r.name.replace('\n', '<br>')}</div>
+      <div class="recipe-time">${r.time}</div>
+    `;
+    card.addEventListener('click', () => toggleRecipe(r.id, card));
+    grid.appendChild(card);
+  });
+}
+
+function toggleRecipe(id, card) {
+  if (selectedIds.has(id)) {
+    selectedIds.delete(id);
+    card.classList.remove('selected');
+  } else {
+    selectedIds.add(id);
+    card.classList.add('selected');
+  }
+}
+
+function clearAll() {
+  selectedIds.clear();
+  document.querySelectorAll('.recipe-card').forEach(c => c.classList.remove('selected'));
+}
+
+// ── Build shopping list ───────────────────────────────────────────────────────
+function buildList() {
+  if (selectedIds.size === 0) {
+    alert('Please select at least one recipe first.');
+    return;
+  }
+  renderList();
+  showTab('list');
+}
+
+function renderList() {
+  const container = document.getElementById('ingredient-list');
+  if (selectedIds.size === 0) {
+    container.innerHTML = '<div class="list-empty">Select recipes on the Shop tab<br>to build your list.</div>';
+    return;
+  }
+
+  let html = '';
+  RECIPES.filter(r => selectedIds.has(r.id)).forEach(r => {
+    html += `<div class="recipe-section-header">
+      <span class="recipe-section-num">${r.id}</span>
+      <span class="recipe-section-name">${r.shortName}</span>
+    </div>`;
+
+    r.ingredients.forEach((ing, idx) => {
+      const key = r.id + '_' + idx;
+      const checked = checkedItems.has(key);
+      if (ing.header) {
+        html += `<div class="ingredient-row">
+          <span class="ing-text header-item">${ing.text}</span>
+        </div>`;
+      } else {
+        const instacartUrl = ing.search
+          ? `https://www.instacart.com/store/search_v3/term?term=${encodeURIComponent(ing.search)}`
+          : null;
+        html += `<div class="ingredient-row ${checked ? 'checked-row' : ''}" id="row-${key}">
+          <div class="checkbox-circle" onclick="toggleCheck('${key}')"></div>
+          <span class="ing-text">${ing.text}</span>
+          ${instacartUrl ? `<a class="instacart-btn" href="${instacartUrl}" target="_blank">🛒 Shop</a>` : ''}
+        </div>`;
+      }
+    });
+  });
+
+  container.innerHTML = html;
+}
+
+function toggleCheck(key) {
+  if (checkedItems.has(key)) {
+    checkedItems.delete(key);
+  } else {
+    checkedItems.add(key);
+  }
+  renderList();
+}
+
+// ── Cook mode ─────────────────────────────────────────────────────────────────
+function buildCookList() {
+  const list = document.getElementById('cook-recipe-list');
+  list.innerHTML = '';
+  RECIPES.forEach(r => {
+    const btn = document.createElement('button');
+    btn.className = 'cook-recipe-btn';
+    btn.innerHTML = `
+      <span class="cook-num">${r.id}</span>
+      <span class="cook-name">${r.name.replace('\n', ' ')}</span>
+      <span class="cook-arrow">›</span>
+    `;
+    btn.addEventListener('click', () => startCooking(r));
+    list.appendChild(btn);
+  });
+}
+
+function startCooking(recipe) {
+  currentStepRecipe = recipe;
+  currentStep = 0;
+  document.getElementById('step-mode').classList.add('active');
+  document.getElementById('cook-recipe-list').parentElement.style.display = 'none';
+  document.querySelector('.selector-header').style.display = 'none';
+  renderStep();
+  requestWakeLock();
+}
+
+function exitStepMode() {
+  document.getElementById('step-mode').classList.remove('active');
+  document.getElementById('cook-recipe-list').parentElement.style.display = 'block';
+  document.querySelector('.selector-header').style.display = 'block';
+  currentStepRecipe = null;
+}
+
+function renderStep() {
+  const r = currentStepRecipe;
+  const total = r.method.length;
+  document.getElementById('step-title').textContent = r.name.replace('\n', ' ');
+  document.getElementById('step-counter').textContent = `Step ${currentStep + 1} of ${total}`;
+  document.getElementById('step-bar').style.width = `${((currentStep + 1) / total) * 100}%`;
+  document.getElementById('step-num').textContent = `Step ${currentStep + 1}`;
+  document.getElementById('step-text').textContent = r.method[currentStep];
+  document.getElementById('prev-btn').disabled = currentStep === 0;
+  const nextBtn = document.getElementById('next-btn');
+  if (currentStep === total - 1) {
+    nextBtn.textContent = 'Done ✓';
+    nextBtn.disabled = false;
+    nextBtn.onclick = () => {
+      document.getElementById('step-text').textContent = "That's it — enjoy!";
+      document.getElementById('step-num').textContent = 'Complete';
+      nextBtn.disabled = true;
+    };
+  } else {
+    nextBtn.textContent = 'Next →';
+    nextBtn.disabled = false;
+    nextBtn.onclick = nextStep;
+  }
+}
+
+function nextStep() {
+  if (currentStep < currentStepRecipe.method.length - 1) {
+    currentStep++;
+    renderStep();
+  }
+}
+
+function prevStep() {
+  if (currentStep > 0) {
+    currentStep--;
+    renderStep();
+  }
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(name + '-section').classList.add('active');
+  document.querySelectorAll('.tab')[['shop','list','cook'].indexOf(name)].classList.add('active');
+
+  if (name === 'list') renderList();
+  if (name === 'cook') {
+    buildCookList();
+    if (document.getElementById('step-mode').classList.contains('active')) {
+      document.getElementById('cook-recipe-list').parentElement.style.display = 'none';
+      document.querySelector('.selector-header').style.display = 'none';
+    }
+  }
+}
+
+// If recipe pre-selected from URL, go straight to list
+if (preSelect) {
+  buildList();
+  showTab('list');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildRecipeGrid();
+</script>
+</body>
+</html>
